@@ -1,0 +1,28 @@
+<html>
+    <title>Hello Canvas</title>
+    <body>
+        <script>
+            //创建canvas标签
+            var mycanvas = document.createElement("canvas");
+            //设置canvas属性信息
+            mycanvas.setAttribute("id","mycanvas");
+            mycanvas.setAttribute("width","400px");
+            mycanvas.setAttribute("height","300px");
+            //设置绘制内容
+            var context1 = mycanvas.getContext("2d");
+            var context2 = mycanvas.getContext("2d");
+            context1.fillStyle = "#00FFFF";
+            context1.strokeStyle = "#00FF00";
+            context1.fillRect(50,50,150,100);
+            context1.lineWidth = 2;
+            context1.strokeRect(50,50,150,100);
+            context2.strokeStyle = "#FF0000";
+            context2.moveTo(50,50);
+            context2.lineTo(200,150);
+            context2.moveTo(250,200);
+            context2.lineTo(300,300);
+            context2.stroke();
+            document.body.appendChild(mycanvas);
+        </script>
+    </body>
+</html>
