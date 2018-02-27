@@ -1,0 +1,16 @@
+<html>
+    <title>Hello World</title>
+    <body id = "bodyid">
+        <!--<div style = "color:blue">Hello World</div>-->
+        <script>
+            var mylab = document.createElement("div");
+            mylab.setAttribute("id","divid");
+            mylab.setAttribute("style","color:blue;border:1px solid #000099;font-size:50px;");
+
+            var text = document.createTextNode("Hello World!");
+            mylab.appendChild(text);
+            var mybody = document.getElementById("bodyid");
+            mybody.appendChild(mylab);
+        </script>
+    </body>
+</html>
