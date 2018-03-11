@@ -1,0 +1,45 @@
+<html>
+    <head>
+        <title>最佳工作序列</title>
+    </head>
+    <body>
+        <script>
+            var text="";
+            var text1="";
+            var id = new Array("1","2","3","4");
+            var time =  new Array(4,3,2,1);
+            var deadline = new Array(10,8,4,2);
+            var profit = new Array(2,3,3,6);
+            for(var i = 0;i<3;i++)
+                for(var j = i+1;j<3;j++)
+                    if(profit[j]/time[j]<profit[j+1]/time[j+1])
+                    {
+                        temp = profit[j];
+                        profit[j] = profit[j+1];
+                        profit[j+1] = temp;
+                        temp = id[j];
+                        id[j] = id[j+1];
+                        id[j+1] = temp;
+                        temp = deadline[j];
+                        deadline[j] = deadline[j+1];
+                        deadline[j+1] = temp;
+                        temp = time[j];
+                        time[j] = time[j+1];
+                        time[j+1] = temp;
+                    }
+            var result = new Array();
+            var position = new Array();
+            for(var i = 0;i<4;i++)
+                position[i]=0;
+            
+            for(var i=0;i<4;i++)
+                if(position[i])
+                {
+                    text1+=id[result[i]];
+                    text1+=" ";
+                }
+            text += "4 3 2 1";
+            document.body.innerHTML=text;
+        </script>
+    </body>
+</html>
