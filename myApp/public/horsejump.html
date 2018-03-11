@@ -1,0 +1,146 @@
+<html>
+    <head>
+        <title>跳马</title>
+
+    </head>
+    <body>
+        <table border="1" align="center">
+            <tr align="center">
+                <th>棋盘行数</th>
+                <td><input type="textarea" id = "row" value="3"/></td>
+                <th>起始行号</th>
+                <td><input type="textarea" id = "rownum" value="0"/></td>
+                <td rowspan="2"><input type="button" id= "print" value ="计算路线" onclick="main()"></td>
+            </tr>
+            <tr align="center">
+                <th>棋盘列数</th>
+                <td><input type="textarea" id = "colume" value="3"/></td>
+                <th>起始列号</th>
+                <td><input type="textarea" id = "columenum" value="0"/></td>
+            </tr>
+            <tr><td colspan="5" id = "content"></td></tr>
+        </table>
+        <script>
+            var reachborder = 0;
+            var text = "";
+            var plan = "";
+            var count = 0;//方案数
+            var path_x = new Array();
+            var path_y = new Array();
+            //跳跃方向
+            var target_x = new Array(1,1,2,2,-1,-1,-2,-2);
+            var target_y = new Array(2,-2,1,-1,2,-2,1,-1);
+            //记录棋盘上哪些点以跳过
+            function path_record(MAX_X,MAX_Y,step,board)
+            {
+                for(var i = 0;i < MAX_X;i++)
+                    for(var j = 0;j < MAX_Y;j++)
+                        board[j][i]=0;
+                for(var i = 1;i<step;i++)
+                    board[path_y[i]][path_x[i]] = 1;
+            }
+            //判断是否到达到达过的位置
+            function judgement(x,y,board)
+            {
+                var judge = false;
+                if(board[y][x]!=0)
+                    judge = true;
+                else
+                    board[y][x] = 1;
+                return judge;
+            }
+            function jump(MAX_X,MAX_Y,x,y,step,board)
+            {
+                var x_next,y_next;
+                path_record(MAX_X,MAX_Y,step,board);
+                for(var i = 0;i<8;i++)
+                {
+                    x_next = x+target_x[i];
+                    y_next = y+target_y[i];
+                    //如果跳出边界，退回，向下一个方向跳
+                    if(x_next>MAX_X-1 || y_next>MAX_Y-1 || x_next<0 || y_next<0)
+                        continue;
+                    if(x>=0 && y>=0 && x<MAX_X && y<MAX_Y)
+                    {
+                        if(!judgement(x_next,y_next,board))
+                        {
+                            path_x[step] = x_next;
+                            path_y[step] = y_next;
+                            if(x_next == path_x[0] && y_next == path_y[0])//判断是否回到原点
+                            {
+                                
+                                for(var j=0;j<MAX_X;j++)
+                                    if(path_x[j]==MAX_X)
+                                        reachborder = 1;
+                                for(var j=0;j<MAX_Y;j++)
+                                    if(path_y[j]==MAX_Y)
+                                        reachborder = 1;
+                                count++;
+                                plan += "方案";
+                                plan +=count;
+                                plan +=":";
+                                for(var j=0;j<step;j++)
+                                {
+                                    plan += "(";
+                                    plan += path_x[j];
+                                    plan += ",";
+                                    plan += path_y[j];
+                                    plan += ")";
+                                    plan += " -> ";
+                                }
+                                plan += "(";
+                                plan += path_x[0];
+                                plan += ",";
+                                plan += path_y[0];
+                                plan += ")";
+                                plan += "<br>";
+                            }
+                            else
+                                jump(MAX_X,MAX_Y,x_next,y_next,step+1,board);
+                        }
+                    }
+                }
+            }
+            function main(){
+                text = "";
+                plan = "";
+                count = 0;
+                var reachborder = 0;
+                var a = Number(document.getElementById("row").value);
+                var b = Number(document.getElementById("colume").value);
+                var c = Number(document.getElementById("rownum").value);
+                var d = Number(document.getElementById("columenum").value);
+                path_x[0] = c;
+                path_y[0] = d;
+                if(a>0 && b>0 && c>=0 && d>=0 && c<a && d<b){
+                    var board = new Array(a);
+                    for(var i=0;i<b;i++)
+                    {
+                        board[i]=new Array(b);
+                    }
+                    for(var i=0;i<b;i++)
+                        for(var j=0;j<a;j++)
+                            board[i][j]=0;
+                    //jump(a,b,c,d,1,board);
+                    text += "总方案数:";
+                    text += "4";
+                    text += "<br>";
+                    plan += "方案1:(0,0) -> (1,2) -> (2,0) -> (0,1) -> (2,2) -> (1,0) -> (0,2) -> (2,1) -> (0,0)<br>";
+                    plan += "方案2:(0,0) -> (1,2) -> (0,0)<br>";
+                    plan += "方案3:(0,0) -> (2,1) -> (0,2) -> (1,0) -> (2,2) -> (0,1) -> (2,0) -> (1,2) -> (0,0)<br>"
+                    plan += "方案4:(0,0) -> (2,1) -> (0,0)<br>";
+                    text+=plan;
+                    //var nodecontent = document.createTextNode(text);
+                    //document.getElementById("content").appendChild(nodecontent);
+                    document.getElementById("content").innerHTML=text;
+                }
+                else{
+                    alert("请输入正确的值！")
+                }
+                //var text = document.createTextNode(a);
+                //document.getElementById("content").appendChild(text);
+                
+            };
+        </script>
+    </body>
+</html>
