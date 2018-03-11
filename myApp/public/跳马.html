@@ -7,14 +7,14 @@
         <table border="1" align="center">
             <tr align="center">
                 <th>棋盘行数</th>
-                <td><input type="textarea" id = "row" value="3"/></td>
+                <td><input type="textarea" id = "row" value="4"/></td>
                 <th>起始行号</th>
                 <td><input type="textarea" id = "rownum" value="0"/></td>
                 <td rowspan="2"><input type="button" id= "print" value ="计算路线" onclick="main()"></td>
             </tr>
             <tr align="center">
                 <th>棋盘列数</th>
-                <td><input type="textarea" id = "colume" value="3"/></td>
+                <td><input type="textarea" id = "colume" value="4"/></td>
                 <th>起始列号</th>
                 <td><input type="textarea" id = "columenum" value="0"/></td>
             </tr>
@@ -68,7 +68,6 @@
                             path_y[step] = y_next;
                             if(x_next == path_x[0] && y_next == path_y[0])//判断是否回到原点
                             {
-                                
                                 for(var j=0;j<MAX_X;j++)
                                     if(path_x[j]==MAX_X)
                                         reachborder = 1;
@@ -102,10 +101,10 @@
                 }
             }
             function main(){
+                reachborder = 0;
                 text = "";
                 plan = "";
                 count = 0;
-                var reachborder = 0;
                 var a = Number(document.getElementById("row").value);
                 var b = Number(document.getElementById("colume").value);
                 var c = Number(document.getElementById("rownum").value);
@@ -121,14 +120,10 @@
                     for(var i=0;i<b;i++)
                         for(var j=0;j<a;j++)
                             board[i][j]=0;
-                    //jump(a,b,c,d,1,board);
+                    jump(a,b,c,d,1,board);
                     text += "总方案数:";
-                    text += "4";
+                    text += count;
                     text += "<br>";
-                    plan += "方案1:(0,0) -> (1,2) -> (2,0) -> (0,1) -> (2,2) -> (1,0) -> (0,2) -> (2,1) -> (0,0)<br>";
-                    plan += "方案2:(0,0) -> (1,2) -> (0,0)<br>";
-                    plan += "方案3:(0,0) -> (2,1) -> (0,2) -> (1,0) -> (2,2) -> (0,1) -> (2,0) -> (1,2) -> (0,0)<br>"
-                    plan += "方案4:(0,0) -> (2,1) -> (0,0)<br>";
                     text+=plan;
                     //var nodecontent = document.createTextNode(text);
                     //document.getElementById("content").appendChild(nodecontent);
