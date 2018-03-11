@@ -5,13 +5,12 @@
     <body>
         <script>
             var text="";
-            var text1="";
             var id = new Array("1","2","3","4");
             var time =  new Array(4,3,2,1);
             var deadline = new Array(10,8,4,2);
             var profit = new Array(2,3,3,6);
-            for(var i = 0;i<3;i++)
-                for(var j = i+1;j<3;j++)
+            for(var i = 2;i>=0;i--)
+                for(var j = 0;j<i+1;j++)
                     if(profit[j]/time[j]<profit[j+1]/time[j+1])
                     {
                         temp = profit[j];
@@ -28,17 +27,33 @@
                         time[j+1] = temp;
                     }
             var result = new Array();
+            var slot = new Array();
             var position = new Array();
-            for(var i = 0;i<4;i++)
+            for(var i = 0;i<10;i++)
+            {
+                slot[i]=0;
                 position[i]=0;
-            
-            for(var i=0;i<4;i++)
+            }
+            for(var i = 3;i>=0;i--)
+            {
+                for(var j=Math.min(10,deadline[i])-1;j>=0;j--)
+                {
+                    if(slot[j]==false)
+                    {
+                        result[j]=i;
+                        position[j]=1;
+                        for(var k = 0;k<time[i];k++)
+                            slot[j-k]=1;
+                        break;
+                    }
+                }
+            }
+            for(var i=0;i<10;i++)
                 if(position[i])
                 {
-                    text1+=id[result[i]];
-                    text1+=" ";
+                    text+=id[result[i]];
+                    text+=" ";
                 }
-            text += "4 3 2 1";
             document.body.innerHTML=text;
         </script>
     </body>
