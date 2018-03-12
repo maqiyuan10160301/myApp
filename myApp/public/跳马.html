@@ -28,8 +28,8 @@
             var path_x = new Array();
             var path_y = new Array();
             //跳跃方向
-            var target_x = new Array(1,1,2,2,-1,-1,-2,-2);
-            var target_y = new Array(2,-2,1,-1,2,-2,1,-1);
+            var target_x = new Array(1,-1,1,-1,2,-2,2,-2);
+            var target_y = new Array(2,-2,-2,2,1,-1,-1,1);
             //记录棋盘上哪些点以跳过
             function path_record(MAX_X,MAX_Y,step,board)
             {
@@ -52,9 +52,10 @@
             function jump(MAX_X,MAX_Y,x,y,step,board)
             {
                 var x_next,y_next;
-                path_record(MAX_X,MAX_Y,step,board);
+                
                 for(var i = 0;i<8;i++)
                 {
+                    path_record(MAX_X,MAX_Y,step,board);
                     x_next = x+target_x[i];
                     y_next = y+target_y[i];
                     //如果跳出边界，退回，向下一个方向跳
@@ -68,35 +69,39 @@
                             path_y[step] = y_next;
                             if(x_next == path_x[0] && y_next == path_y[0])//判断是否回到原点
                             {
-                                for(var j=0;j<MAX_X;j++)
-                                    if(path_x[j]==MAX_X)
+                                for(var j=1;j<MAX_X;j++)
+                                    if(path_x[j]==MAX_X-1)
                                         reachborder = 1;
-                                for(var j=0;j<MAX_Y;j++)
-                                    if(path_y[j]==MAX_Y)
+                                for(var j=1;j<MAX_Y;j++)
+                                    if(path_y[j]==MAX_Y-1)
                                         reachborder = 1;
-                                count++;
-                                plan += "方案";
-                                plan +=count;
-                                plan +=":";
-                                for(var j=0;j<step;j++)
-                                {
+                                if(reachborder == 1){
+                                    count++;
+                                    plan += "方案";
+                                    plan +=count;
+                                    plan +=":";
+                                    for(var j=0;j<step;j++)
+                                    {
+                                        plan += "(";
+                                        plan += path_x[j];
+                                        plan += ",";
+                                        plan += path_y[j];
+                                        plan += ")";
+                                        plan += " -> ";
+                                    }
                                     plan += "(";
-                                    plan += path_x[j];
+                                    plan += path_x[0];
                                     plan += ",";
-                                    plan += path_y[j];
+                                    plan += path_y[0];
                                     plan += ")";
-                                    plan += " -> ";
+                                    plan += "<br>";
                                 }
-                                plan += "(";
-                                plan += path_x[0];
-                                plan += ",";
-                                plan += path_y[0];
-                                plan += ")";
-                                plan += "<br>";
                             }
                             else
                                 jump(MAX_X,MAX_Y,x_next,y_next,step+1,board);
                         }
+                        else
+                            continue;
                     }
                 }
             }
