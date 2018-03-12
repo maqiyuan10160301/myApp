@@ -5,20 +5,21 @@
     </head>
     <body>
         <table border="1" align="center">
+            <tr><td colspan="5">马按中国象棋跳法，从初始位置起跳，跳至边界后返回，求所有到达边界后返回初始位置、过程中跳跃点不重复的周游路线。</td></tr>
             <tr align="center">
                 <th>棋盘行数</th>
-                <td><input type="textarea" id = "row" value="4"/></td>
+                <td><input type="textarea" id="row" value="4"/></td>
                 <th>起始行号</th>
-                <td><input type="textarea" id = "rownum" value="0"/></td>
-                <td rowspan="2"><input type="button" id= "print" value ="计算路线" onclick="main()"></td>
+                <td><input type="textarea" id="rownum" value="0"/></td>
+                <td rowspan="2"><input type="button" id="print" value="计算路线" onclick="main()"></td>
             </tr>
             <tr align="center">
                 <th>棋盘列数</th>
-                <td><input type="textarea" id = "colume" value="4"/></td>
+                <td><input type="textarea" id="colume" value="4"/></td>
                 <th>起始列号</th>
-                <td><input type="textarea" id = "columenum" value="0"/></td>
+                <td><input type="textarea" id="columenum" value="0"/></td>
             </tr>
-            <tr><td colspan="5" id = "content"></td></tr>
+            <tr><td colspan="5" id="content"></td></tr>
         </table>
         <script>
             var reachborder = 0;
@@ -33,17 +34,17 @@
             //记录棋盘上哪些点以跳过
             function path_record(MAX_X,MAX_Y,step,board)
             {
-                for(var i = 0;i < MAX_X;i++)
-                    for(var j = 0;j < MAX_Y;j++)
-                        board[j][i]=0;
-                for(var i = 1;i<step;i++)
+                for(var i = 0; i < MAX_X; i++)
+                    for(var j = 0; j < MAX_Y; j++)
+                        board[j][i] = 0;
+                for(var i = 1; i < step; i++)
                     board[path_y[i]][path_x[i]] = 1;
             }
-            //判断是否到达到达过的位置
+            //判断是否跳到到达过的位置
             function judgement(x,y,board)
             {
                 var judge = false;
-                if(board[y][x]!=0)
+                if(board[y][x] != 0)
                     judge = true;
                 else
                     board[y][x] = 1;
@@ -52,16 +53,15 @@
             function jump(MAX_X,MAX_Y,x,y,step,board)
             {
                 var x_next,y_next;
-                
-                for(var i = 0;i<8;i++)
+                for(var i = 0; i < 8; i++)
                 {
                     path_record(MAX_X,MAX_Y,step,board);
-                    x_next = x+target_x[i];
-                    y_next = y+target_y[i];
+                    x_next = x + target_x[i];
+                    y_next = y + target_y[i];
                     //如果跳出边界，退回，向下一个方向跳
-                    if(x_next>MAX_X-1 || y_next>MAX_Y-1 || x_next<0 || y_next<0)
+                    if(x_next > MAX_X - 1 || y_next > MAX_Y - 1 || x_next < 0 || y_next < 0)
                         continue;
-                    if(x>=0 && y>=0 && x<MAX_X && y<MAX_Y)
+                    if(x >= 0 && y >= 0 && x < MAX_X && y < MAX_Y)
                     {
                         if(!judgement(x_next,y_next,board))
                         {
@@ -69,17 +69,19 @@
                             path_y[step] = y_next;
                             if(x_next == path_x[0] && y_next == path_y[0])//判断是否回到原点
                             {
-                                for(var j=1;j<MAX_X;j++)
-                                    if(path_x[j]==MAX_X-1)
+                                //判断是否到达过边界
+                                for(var j = 1; j < step; j++)
+                                    if(path_x[j] == MAX_X - 1)
                                         reachborder = 1;
-                                for(var j=1;j<MAX_Y;j++)
-                                    if(path_y[j]==MAX_Y-1)
+                                for(var j = 1; j < step; j++)
+                                    if(path_y[j] == MAX_Y - 1)
                                         reachborder = 1;
+                                //记录方案
                                 if(reachborder == 1){
                                     count++;
                                     plan += "方案";
-                                    plan +=count;
-                                    plan +=":";
+                                    plan += count;
+                                    plan += ":";
                                     for(var j=0;j<step;j++)
                                     {
                                         plan += "(";
@@ -95,10 +97,12 @@
                                     plan += path_y[0];
                                     plan += ")";
                                     plan += "<br>";
+                                    
                                 }
+                                reachborder = 0;
                             }
                             else
-                                jump(MAX_X,MAX_Y,x_next,y_next,step+1,board);
+                                jump(MAX_X,MAX_Y,x_next,y_next,step + 1,board);//跳下一步
                         }
                         else
                             continue;
@@ -110,21 +114,22 @@
                 text = "";
                 plan = "";
                 count = 0;
+                //获取用户输入信息
                 var a = Number(document.getElementById("row").value);
                 var b = Number(document.getElementById("colume").value);
                 var c = Number(document.getElementById("rownum").value);
                 var d = Number(document.getElementById("columenum").value);
                 path_x[0] = c;
                 path_y[0] = d;
-                if(a>0 && b>0 && c>=0 && d>=0 && c<a && d<b){
+                if(a > 0 && b > 0 && c >= 0 && d >= 0 && c < a && d < b){
                     var board = new Array(a);
-                    for(var i=0;i<b;i++)
+                    for(var i = 0; i < b; i++)
                     {
-                        board[i]=new Array(b);
+                        board[i] = new Array(b);
                     }
-                    for(var i=0;i<b;i++)
-                        for(var j=0;j<a;j++)
-                            board[i][j]=0;
+                    for(var i = 0;i < b; i++)
+                        for(var j = 0;j < a; j++)
+                            board[i][j] = 0;
                     jump(a,b,c,d,1,board);
                     text += "总方案数:";
                     text += count;
@@ -134,6 +139,7 @@
                     //document.getElementById("content").appendChild(nodecontent);
                     document.getElementById("content").innerHTML=text;
                 }
+                //如果用户输入信息无效，让用户重新输入
                 else{
                     alert("请输入正确的值！")
                 }
