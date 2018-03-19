@@ -1,0 +1,131 @@
+<html>
+    <header>
+        <title>Transform</title>
+    </header>
+    <body>
+        <input type="file" id="file" onchange="readGen(this.file)"><br>
+        <div id = "div"></div><br>
+        <canvas id = "canvas"></canvas><br>
+        <div id = "div1"></div><br>
+        <canvas id = "canvas1"></canvas><br>
+        <div id = "div2"></div><br>
+        <canvas id = "canvas2"></canvas><br>
+        <div id = "div3"></div><br>
+        <canvas id = "canvas3"></canvas><br>
+        <div id = "div4"></div><br>
+        <canvas id = "canvas4"></canvas><br>
+        <div id = "div5"></div><br>
+        <canvas id = "canvas5"></canvas><br>
+        <div id = "div6"></div><br>
+        <canvas id = "canvas6"></canvas><br>
+        <script>
+            function readGen(file)
+            {
+                var mydiv = document.getElementById("div");
+                mydiv.innerHTML = "原始：";
+                var mydiv1 = document.getElementById("div1");
+                mydiv1.innerHTML = "左斜变换：";
+                var mydiv2 = document.getElementById("div2");
+                mydiv2.innerHTML = "耸肩变换：";
+                var mydiv3 = document.getElementById("div3");
+                mydiv3.innerHTML = "比例变换：";
+                var mydiv4 = document.getElementById("div4");
+                mydiv4.innerHTML = "旋转变换：";
+                var mydiv5 = document.getElementById("div5");
+                mydiv5.innerHTML = "对称变换：";
+                var mydiv6 = document.getElementById("div6");
+                mydiv6.innerHTML = "平移变换：";
+
+                var mycanvas = document.getElementById("canvas");
+                var mycanvas1 = document.getElementById("canvas1");
+                var mycanvas2 = document.getElementById("canvas2");
+                var mycanvas3 = document.getElementById("canvas3");
+                var mycanvas4 = document.getElementById("canvas4");
+                var mycanvas5 = document.getElementById("canvas5");
+                var mycanvas6 = document.getElementById("canvas6");
+
+                mycanvas.setAttribute("width","1000px");
+                mycanvas1.setAttribute("width","1000px");
+                mycanvas2.setAttribute("width","1000px");
+                mycanvas2.setAttribute("height","260px");
+                mycanvas3.setAttribute("width","1000px");
+                mycanvas4.setAttribute("width","1000px");
+                mycanvas4.setAttribute("height","400px");
+                mycanvas5.setAttribute("width","1000px");
+                mycanvas5.setAttribute("height","550px");
+                mycanvas6.setAttribute("width","1000px");
+                mycanvas6.setAttribute("height","260px");
+
+                var context = mycanvas.getContext("2d");
+                var context1 = mycanvas1.getContext("2d");
+                var context2 = mycanvas2.getContext("2d");
+                var context3 = mycanvas3.getContext("2d");
+                var context4 = mycanvas4.getContext("2d");
+                var context5 = mycanvas5.getContext("2d");
+                var context6 = mycanvas6.getContext("2d");
+                
+                var b1 = Math.tan(15 * Math.PI / 180);
+
+                //读取文件
+                var file = document.getElementById("file").files[0];
+                var reader = new FileReader();
+                reader.readAsText(file);
+                reader.onload=function(e){
+                    var lines = new Array();
+                    var str = "";
+                    str += reader.result;
+                    lines = reader.result.split("\n");
+                    
+                    var start_x = Number(lines[1].split(",")[0]);
+                    var start_y = Number(lines[1].split(",")[1]);
+
+                    //从第一个特征点处落笔
+                    context.moveTo(10 * start_x,160 - 10 * start_y);
+                    context1.moveTo(10 + 10 * (start_x - b1 * start_y),160 - 10 * start_y);
+                    context2.moveTo(10 * start_x,260 - 10 * (start_y + b1 * start_x));
+                    context3.moveTo(5 * start_x,160 - 10 * start_y)
+                    context4.moveTo(10 * (start_x * Math.sqrt(1/2) + start_y * Math.sqrt(1/2)),70 - 10 * (start_y * Math.sqrt(1/2) - start_x * Math.sqrt(1/2)));
+                    context5.moveTo(160 - 10 * start_y,10 * start_x);
+                    context6.moveTo(10 * start_x + 100,260 - 10 * start_y);
+                    for(var i = 2; i < lines.length - 1; i++)
+                    {
+                        var a = lines[i].split(",")[0];
+                        var b = lines[i].split(",")[1];
+                        if(b==undefined && i != lines.length - 2)//遇到END时
+                        {
+                            x_next = Number(lines[i+2].split(",")[0]);
+                            y_next = Number(lines[i+2].split(",")[1]);
+                            context.moveTo(10 * x_next,160 - 10 * y_next);
+                            context1.moveTo(10 + 10 * (x_next - b1 * y_next),160 - 10 * y_next);
+                            context2.moveTo(10 * x_next,260 - 10 * (y_next + b1 * x_next));
+                            context3.moveTo(5 * x_next,160 - 10 * y_next);
+                            context4.moveTo(10 * (x_next * Math.sqrt(1/2) + y_next * Math.sqrt(1/2)),70 - 10 * (y_next * Math.sqrt(1/2) - x_next * Math.sqrt(1/2)));
+                            context5.moveTo(160 - 10 * y_next,10 * x_next);
+                            context6.moveTo(10 * x_next + 100,260 - 10 * y_next);
+                            i += 2;
+                        }
+                        else
+                        {
+                            a = Number(a);
+                            b = Number(b);
+                            context.lineTo(10 * a,160 - 10 * b);
+                            context1.lineTo((10 + 10 * (a - b1 * b)),(160 - 10 * b));
+                            context2.lineTo(10 * a,(260 - 10*(b + b1 * a)));
+                            context3.lineTo(5 * a,160 - 10 * b);
+                            context4.lineTo(10 * (a * Math.sqrt(1/2) + b * Math.sqrt(1/2)),70 - 10 * (b * Math.sqrt(1/2) - a * Math.sqrt(1/2)));
+                            context5.lineTo(160 - 10 * b,10 * a);
+                            context6.lineTo(10 * a + 100,260 - 10 * b);
+                        }
+                    }
+                    context.stroke();
+                    context1.stroke();
+                    context2.stroke();
+                    context3.stroke();
+                    context4.stroke();
+                    context5.stroke();
+                    context6.stroke();
+                }
+            }
+        </script>
+    </body>
+</html>
