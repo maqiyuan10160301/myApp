@@ -20,5 +20,5 @@
 
 ## 地图投影
 
-- [兰勃特投影与墨卡托投影](https://maqiyuan10160301.github.io/myApp/myApp/public/China_54_projection.html)
+- [兰勃特投影与墨卡托投影](https://maqiyuan10160301.github.io/myApp/myApp/public/BJ_54_projection.html)
 - [墨卡托投影与大圆航线](https://maqiyuan10160301.github.io/myApp/myApp/public/WGS_84_projection.html)
