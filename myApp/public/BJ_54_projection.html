@@ -1,0 +1,272 @@
+<html>
+    <header>
+        <title>兰勃特投影与墨卡托投影</title>
+    </header>
+    <body>
+        <input type="file" id="file" onchange="readGen(this.file)"><br>
+        <div id = "div"></div><br>
+        <canvas id = "canvas"></canvas><br>
+        <div id = "div1"></div><br>
+        <canvas id = "canvas1"></canvas><br>
+        <div id = "div2"></div><br>
+        <canvas id = "canvas2"></canvas><br>
+        <script>
+            //北京54坐标系对应参数
+            var a = 6378245;
+            var b = 6356863.01877;
+            var e_square = 0.006693421622966;
+            var e = Math.sqrt(e_square);
+            var e2_square = 0.006738525414684;
+            var e2 = Math.sqrt(e2_square);
+
+            //兰勃特投影对应参数
+            var B_Lambert = 0;
+            var B1_Lambert = 20;
+            var B2_Lambert = 40;
+            var L_Lambert = 105;
+            var mB1 = Math.cos(B1_Lambert*Math.PI/180)/(Math.sqrt(1-e_square*Math.sin(B1_Lambert*Math.PI/180)*Math.sin(B1_Lambert*Math.PI/180)));
+            var mB2 = Math.cos(B2_Lambert*Math.PI/180)/(Math.sqrt(1-e_square*Math.sin(B2_Lambert*Math.PI/180)*Math.sin(B2_Lambert*Math.PI/180)));
+            var tB0 = Math.tan(Math.PI/4-B_Lambert*Math.PI/360)/Math.pow((1-e*Math.sin(B_Lambert*Math.PI/180))/(1+e*Math.sin(B_Lambert*Math.PI/180)),e/2);
+            var tB1 = Math.tan(Math.PI/4-B1_Lambert*Math.PI/360)/Math.pow((1-e*Math.sin(B1_Lambert*Math.PI/180))/(1+e*Math.sin(B1_Lambert*Math.PI/180)),e/2);
+            var tB2 = Math.tan(Math.PI/4-B2_Lambert*Math.PI/360)/Math.pow((1-e*Math.sin(B2_Lambert*Math.PI/180))/(1+e*Math.sin(B2_Lambert*Math.PI/180)),e/2);
+            var n = Math.log(mB1/mB2)/Math.log(tB1/tB2);
+            var F = mB1/(n*Math.pow(tB1,n));
+            var r0 = a*F*Math.pow(tB0,n);
+            
+            //墨卡托投影对应参数
+            B_Mercator = 0;
+            L_Mercator = 0;
+            K_Mercator = (a*a/b)*Math.cos(B_Mercator*Math.PI/180)/Math.sqrt(1+e2_square*Math.cos(B_Mercator*Math.PI/180)*Math.cos(B_Mercator*Math.PI/180));
+            
+            
+            function readGen(file)
+            {
+                var mydiv = document.getElementById("div");
+                mydiv.innerHTML = "北京54坐标系：";
+                var mydiv1 = document.getElementById("div1");
+                mydiv1.innerHTML = "兰勃特投影：";
+                var mydiv2 = document.getElementById("div2");
+                mydiv2.innerHTML = "墨卡托投影：";
+                var mycanvas = document.getElementById("canvas");
+                var mycanvas1 = document.getElementById("canvas1");
+                var mycanvas2 = document.getElementById("canvas2");
+                mycanvas.setAttribute("width","1000px");
+                mycanvas.setAttribute("height","1000px");
+                mycanvas1.setAttribute("width","1000px");
+                mycanvas1.setAttribute("height","1000px");
+                mycanvas2.setAttribute("width","1000px");
+                mycanvas2.setAttribute("height","1000px");
+                var context = mycanvas.getContext("2d");
+                var context1 = mycanvas1.getContext("2d");
+                var context2 = mycanvas2.getContext("2d");
+
+                
+                //将地图自动缩放到1000*1000
+                function ZoomToCenter(lines)
+                {
+                    var latmax = Number(lines[1].split(",")[1]);
+                    var lonmax = Number(lines[1].split(",")[0]);
+                    var latmin = Number(lines[1].split(",")[1]);
+                    var lonmin = Number(lines[1].split(",")[0]);
+
+                    for(var i = 2;i<lines.length-1;i++)
+                    {
+                        if(lines[i].split(",")[1] == undefined && i != lines.length - 2)
+                        {
+                            i += 2;
+                        }
+                        else
+                        {
+                            if(Number(lines[i].split(",")[0])>lonmax)
+                                lonmax = Number(lines[i].split(",")[0]);
+                            if(Number(lines[i].split(",")[0])<lonmin)
+                                lonmin = Number(lines[i].split(",")[0]);
+                            if(Number(lines[i].split(",")[1])>latmax)
+                                latmax = Number(lines[i].split(",")[1]);
+                            if(Number(lines[i].split(",")[1])<latmin)
+                                latmin = Number(lines[i].split(",")[1]);
+                        }
+                    }
+                    var scale = 1000/Math.max(lonmax-lonmin,latmax-latmin);
+                    var XOffsize = latmax;
+                    var YOffsize = lonmin;
+                    return{a1:scale,b1:XOffsize,c1:YOffsize};
+                }
+                
+                function linestoLambert(lines)
+                {
+                    var newlines = new Array(lines.length);
+                    newlines[0] = lines[0];
+                    for(var i = 1;i<lines.length-1;i++)
+                    {
+                        if(lines[i].split(",")[1] == undefined && i != lines.length - 2)
+                        {
+                            newlines[i] = lines[i];
+                            newlines[i+1] = lines[i+1];
+                            i += 1;
+                        }
+                        else
+                        {
+                            newlines[i] = String(LambertY(lines[i].split(",")[1],lines[i].split(",")[0])) + "," + String(LambertX(lines[i].split(",")[1],lines[i].split(",")[0]));
+                        }
+                    }
+                    return newlines;
+                }
+
+                function linestoMercator(lines)
+                {
+                    var newlines = new Array(lines.length);
+                    newlines[0] = lines[0];
+                    for(var i = 1;i<lines.length-1;i++)
+                    {
+                        if(lines[i].split(",")[1] == undefined && i != lines.length - 2)
+                        {
+                            newlines[i] = lines[i];
+                            newlines[i+1] = lines[i+1];
+                            i += 1;
+                        }
+                        else
+                        {
+                            newlines[i] = String(MercatorY(lines[i].split(",")[0])) + "," + String(MercatorX(lines[i].split(",")[1]));
+                        }
+                    }
+                    return newlines;
+                }
+
+                //通过兰勃特投影变换得到X
+                function LambertX(B,L)
+                {
+                    var tB = Math.tan(Math.PI/4-B*Math.PI/360)/Math.pow((1-e*Math.sin(B*Math.PI/180))/(1+e*Math.sin(B*Math.PI/180)),e/2);
+                    var theta = n*(L-L_Lambert)*Math.PI/180;
+                    var rB = a*F*Math.pow(tB,n);
+                    return(r0-rB*Math.cos(theta));
+                }
+                //通过兰勃特投影变换得到Y
+                function LambertY(B,L)
+                {
+                    var tB = Math.tan(Math.PI/4-B*Math.PI/360)/Math.pow((1-e*Math.sin(B*Math.PI/180))/(1+e*Math.sin(B*Math.PI/180)),e/2);
+                    var theta = n*(L-L_Lambert)*Math.PI/180;
+                    var rB = a*F*Math.pow(tB,n);
+                    return(rB*Math.sin(theta));
+                }
+                //纬度通过墨卡托投影变换为X
+                function MercatorX(B)
+                {
+                    return(K_Mercator * Math.log(Math.tan(Math.PI / 4 + B*Math.PI/360)*Math.pow((1-e*Math.sin(B*Math.PI/180))/(1+e*Math.sin(B*Math.PI/180)),e/2)));
+                }
+                //经度通过墨卡托投影变换为Y
+                function MercatorY(L)
+                {
+                    return(K_Mercator*(L * Math.PI / 180-L_Mercator));
+                }
+
+                //读取文件
+                var file = document.getElementById("file").files[0];
+                var reader = new FileReader();
+                reader.readAsText(file);
+                reader.onload=function(e){
+                    var lines = new Array();
+                    var str = "";
+                    str += reader.result;
+                    lines = reader.result.split("\n");
+                    
+                    //经过投影变换的字符数组
+                    var lines_Lambert = linestoLambert(lines);
+                    var lines_Mercator = linestoMercator(lines);
+                    
+                    //起点
+                    var start_Y = Number(lines[1].split(",")[0]);
+                    var start_X = Number(lines[1].split(",")[1]);
+                    var Lambert_X = Number(lines_Lambert[1].split(",")[1]);
+                    var Lambert_Y = Number(lines_Lambert[1].split(",")[0]);
+                    var Mercator_X = Number(lines_Mercator[1].split(",")[1]);
+                    var Mercator_Y = Number(lines_Mercator[1].split(",")[0]);
+                    
+                    //不同投影的缩放参数
+                    var scale1 = ZoomToCenter(lines).a1;
+                    var XOffsize1 = ZoomToCenter(lines).b1;
+                    var YOffsize1 = ZoomToCenter(lines).c1
+                    var scale2 = ZoomToCenter(lines_Lambert).a1;
+                    var XOffsize2 = ZoomToCenter(lines_Lambert).b1;
+                    var YOffsize2 = ZoomToCenter(lines_Lambert).c1
+                    var scale3 = ZoomToCenter(lines_Mercator).a1;
+                    var XOffsize3 = ZoomToCenter(lines_Mercator).b1;
+                    var YOffsize3 = ZoomToCenter(lines_Mercator).c1
+                    
+                    //从第一个特征点处落笔
+                    context.moveTo(scale1 * (start_Y - YOffsize1),scale1*(XOffsize1 - start_X));
+                    context1.moveTo((Lambert_Y-YOffsize2)*scale2,(XOffsize2 -Lambert_X)*scale2);
+                    context2.moveTo((Mercator_Y-YOffsize3)*scale3,(XOffsize3 -Mercator_X)*scale3);
+                    
+                    for(var i = 2; i < lines.length - 1; i++)
+                    {
+                        var b = lines[i].split(",")[0];
+                        var a = lines[i].split(",")[1];
+                        if(a==undefined && i != lines.length - 2)//遇到END时
+                        {
+                            var Y_next = Number(lines[i+2].split(",")[0]);
+                            var X_next = Number(lines[i+2].split(",")[1]);
+                            var Lambert_X_next = Number(lines_Lambert[i+2].split(",")[1]);
+                            var Lambert_Y_next = Number(lines_Lambert[i+2].split(",")[0]);
+                            var Mercator_X_next = Number(lines_Mercator[i+2].split(",")[1]);
+                            var Mercator_Y_next = Number(lines_Mercator[i+2].split(",")[0]);
+                            context.moveTo(scale1*(Y_next-YOffsize1),scale1*(XOffsize1-X_next));
+                            context1.moveTo((Lambert_Y_next-YOffsize2)*scale2,(XOffsize2-Lambert_X_next)*scale2);
+                            context2.moveTo((Mercator_Y_next-YOffsize3)*scale3, (XOffsize3-Mercator_X_next)*scale3);
+                            i += 1;
+                        }
+                        else
+                        {
+                            a = Number(a);
+                            b = Number(b);
+                            var Lambert_X_a = lines_Lambert[i].split(",")[1];
+                            var Lambert_Y_b = lines_Lambert[i].split(",")[0];
+                            var Mercator_X_a = lines_Mercator[i].split(",")[1];
+                            var Mercator_Y_b = lines_Mercator[i].split(",")[0];
+                            context.lineTo(scale1*(b-YOffsize1),scale1*(XOffsize1-a));
+                            context1.lineTo((Lambert_Y_b-YOffsize2)*scale2,(XOffsize2-Lambert_X_a)*scale2);
+                            context2.lineTo((Mercator_Y_b-YOffsize3)*scale3,(XOffsize3-Mercator_X_a)*scale3);
+                        }
+                    }
+                    
+                    //画经度格网
+                    for(var i = 0; i < 180; i += 5){
+                        context.moveTo(scale1*(i-YOffsize1),scale1*(XOffsize1-0));
+                        context1.moveTo((LambertY(0,i)-YOffsize2)*scale2,(XOffsize2-LambertX(0,i))*scale2);
+                        context2.moveTo((MercatorY(i)-YOffsize3)*scale3,(XOffsize3-MercatorX(0))*scale3);
+                        for(var j = 0; j < 89; j += 1)
+                        {
+                            var Lambert_X_i = LambertX(j,i);
+                            var Lambert_Y_j = LambertY(j,i);
+                            var Mercator_X_i = MercatorX(j);
+                            var Mercator_Y_j = MercatorY(i);
+                            context.lineTo(scale1*(i-YOffsize1),scale1*(XOffsize1-j));
+                            context1.lineTo((Lambert_Y_j-YOffsize2)*scale2,(XOffsize2-Lambert_X_i)*scale2);
+                            context2.lineTo((Mercator_Y_j-YOffsize3)*scale3,(XOffsize3-Mercator_X_i)*scale3);
+                        }
+                    }
+                    
+                    //画纬度格网 
+                    for(var j = 0; j < 89; j += 5){
+                        context.moveTo(scale1*(0),scale1*(XOffsize1-j));
+                        context1.moveTo((LambertY(j,0)-YOffsize2)*scale2,(XOffsize2-LambertX(j,0))*scale2);
+                        context2.moveTo((MercatorY(0)-YOffsize3)*scale3,(XOffsize3-MercatorX(j))*scale3);
+                        for(var i = 0; i < 180; i += 1)
+                        {
+                            var Lambert_X_i = LambertX(j,i);
+                            var Lambert_Y_j = LambertY(j,i);
+                            var Mercator_X_i = MercatorX(j);
+                            var Mercator_Y_j = MercatorY(i);
+                            context.lineTo(scale1*(i-YOffsize1),scale1*(XOffsize1-j));
+                            context1.lineTo((Lambert_Y_j-YOffsize2)*scale2,(XOffsize2-Lambert_X_i)*scale2);
+                            context2.lineTo((Mercator_Y_j-YOffsize3)*scale3,(XOffsize3-Mercator_X_i)*scale3);
+                        }
+                    }
+                    context.stroke();
+                    context1.stroke();
+                    context2.stroke();
+                }
+            }
+        </script>
+    </body>
+</html>
