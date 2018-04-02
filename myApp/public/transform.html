@@ -74,6 +74,7 @@
                     var lines = new Array();
                     var str = "";
                     str += reader.result;
+                    str = str.trim();
                     lines = reader.result.split("\n");
                     
                     var start_x = Number(lines[1].split(",")[0]);

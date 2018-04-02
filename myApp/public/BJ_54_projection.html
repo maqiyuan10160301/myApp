@@ -168,8 +168,12 @@
                     var lines = new Array();
                     var str = "";
                     str += reader.result;
-                    lines = reader.result.split("\n");
+                    str = str.trim();
+                    lines = str.split("\n");
                     
+                    for (var i = lines.length-1;i>=0;i--)
+                        if(lines[i] == "END")
+                            break;
                     //经过投影变换的字符数组
                     var lines_Lambert = linestoLambert(lines);
                     var lines_Mercator = linestoMercator(lines);
