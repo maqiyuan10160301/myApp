@@ -10,11 +10,11 @@
 - [跳马问题](https://maqiyuan10160301.github.io/myApp/myApp/public/跳马.html)
 - [最佳工作序列](https://maqiyuan10160301.github.io/myApp/myApp/public/最佳工作序列.html)
 
-## 空间编码
+## 空间数据编码
 
 - [空间对象几何特征编码](https://maqiyuan10160301.github.io/myApp/myApp/public/readgen.html)
 
-## 空间坐标变换
+## 平面坐标变换
 
 - [空间平面坐标变换](https://maqiyuan10160301.github.io/myApp/myApp/public/transform.html)
 
@@ -22,3 +22,7 @@
 
 - [兰勃特投影与墨卡托投影](https://maqiyuan10160301.github.io/myApp/myApp/public/BJ_54_projection.html)
 - [墨卡托投影与大圆航线](https://maqiyuan10160301.github.io/myApp/myApp/public/WGS_84_projection.html)
+
+## 空间度量算法
+
+- [多边形面积计算](https://maqiyuan10160301.github.io/myApp/myApp/public/areaofpolygon.html)
