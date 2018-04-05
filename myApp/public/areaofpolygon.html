@@ -1,0 +1,293 @@
+<html>
+    <header>
+        <title>兰勃特投影与墨卡托投影</title>
+    </header>
+    <body>
+        <input type="file" id="file" onchange="readGen(this.file)"><br>
+        <div id = "div"></div><br>
+        <canvas id = "canvas"></canvas><br>
+        <div id = "div2"></div><br>
+        <table id = "table1"></table>
+        <div id = "div1"></div><br>
+        <canvas id = "canvas1"></canvas><br>
+        <table id = "table2"></table>
+
+        <script>
+            //北京54坐标系对应参数
+            var a = 6378245;
+            var b = 6356863.01877;
+            var e_square = (a*a-b*b)/(a*a);
+            var e = Math.sqrt(e_square);
+            var e2_square = (a*a-b*b)/(b*b);
+            var e2 = Math.sqrt(e2_square);
+            
+            //墨卡托投影对应参数
+            B_Mercator = 0;
+            L_Mercator = 0;
+            K_Mercator = (a*a/b)*Math.cos(B_Mercator*Math.PI/180)/Math.sqrt(1+e2_square*Math.cos(B_Mercator*Math.PI/180)*Math.cos(B_Mercator*Math.PI/180));
+            
+            //梯形面积算法对应参数
+            A_trapezium = 1+1/2*e_square+3/8*Math.pow(e_square,2)+5/16*Math.pow(e_square,3);
+            B_trapezium = 1/6*e_square+3/16*Math.pow(e_square,2)+3/16*Math.pow(e_square,3);
+            C_trapezium = 3/80*Math.pow(e_square,2)+1/16*Math.pow(e_square,3);
+            D_trapezium = 1/112*Math.pow(e_square,3);
+
+            function readGen(file)
+            {
+                var mydiv = document.getElementById("div");
+                mydiv.innerHTML = "墨卡托投影：";
+                var mydiv1 = document.getElementById("div1");
+                mydiv1.innerHTML = "北京54坐标系：";
+                var mycanvas = document.getElementById("canvas");
+                var mycanvas1 = document.getElementById("canvas1");
+                mycanvas.setAttribute("width","600px");
+                mycanvas.setAttribute("height","600px");
+                mycanvas1.setAttribute("width","600px");
+                mycanvas1.setAttribute("height","600px");
+                var context = mycanvas.getContext("2d");
+                var context1 = mycanvas1.getContext("2d");
+
+                var area = new Array();
+                var area_54 = new Array();
+                area.push(0);
+                area_54.push(0);
+                var x = new Array();
+                var y = new Array();
+                var x_54 = new Array();
+                var y_54 = new Array();
+
+                //将地图自动缩放到1000*1000
+                function ZoomToCenter(lines)
+                {
+                    var latmax = Number(lines[1].split(",")[1]);
+                    var lonmax = Number(lines[1].split(",")[0]);
+                    var latmin = Number(lines[1].split(",")[1]);
+                    var lonmin = Number(lines[1].split(",")[0]);
+
+                    for(var i = 2;i<lines.length-1;i++)
+                    {
+                        if(lines[i].split(",")[1] == undefined && i != lines.length - 2)
+                        {
+                            i += 1;
+                        }
+                        else
+                        {
+                            if(Number(lines[i].split(",")[0])>lonmax)
+                                lonmax = Number(lines[i].split(",")[0]);
+                            if(Number(lines[i].split(",")[0])<lonmin)
+                                lonmin = Number(lines[i].split(",")[0]);
+                            if(Number(lines[i].split(",")[1])>latmax)
+                                latmax = Number(lines[i].split(",")[1]);
+                            if(Number(lines[i].split(",")[1])<latmin)
+                                latmin = Number(lines[i].split(",")[1]);
+                        }
+                    }
+                    var scale = 600/Math.max(lonmax-lonmin,latmax-latmin);
+                    var XOffsize = latmax;
+                    var YOffsize = lonmin;
+                    return{a1:scale,b1:XOffsize,c1:YOffsize};
+                }
+
+                //根据xy计算面积
+                function calarea(x,y)
+                {
+                    var sum = 0;
+                    for (var i = 1;i<x.length;i++)
+                    {
+                        sum += (x[i%(x.length-1)]*(y[(i+1)%(x.length-1)]-y[i-1]));
+                    }
+                    return sum/2;
+                }
+
+                //计算面积并计入数组
+                function recordarea(index,area,x,y)
+                {
+                    if(index == area.length)
+                    {
+                        area[index-1] += calarea(x,y);
+                    }
+                    else
+                    {
+                        area.push(calarea(x,y));
+                    }
+                }
+                
+                //反算经度
+                function reverseMercatorL(Y)
+                {
+                    return ((Y/K_Mercator + L_Mercator)*180/Math.PI);
+                }
+                
+                //反算纬度
+                function reverseMercatorB(X,B1)
+                {
+                    B2 = Math.PI/2-2*Math.atan(Math.exp(-X/K_Mercator)*Math.exp(e/2*Math.log((1-e*Math.sin(B1)/(1+e*Math.sin(B1))))));
+                    if(Math.abs(B1 - B2)>0.000000000001)
+                    {
+                        return reverseMercatorB(X,B2);
+                    }
+                    else
+                    {
+                        return B2;
+                    }
+                }
+
+                //梯形法计算面积
+                function calarea_54(x_54,y_54)
+                {
+                    var sum = 0;
+                    for(var i = 0;i<x_54.length-1;i++)
+                    {
+                        var K_trapezium = 2*a*a*(1-e_square)*((y_54[(i+1)]-y_54[i])*Math.PI/180);
+                        var fai2 = Math.PI/180*(x_54[(i+1)]+x_54[i])/2;
+                        var fai3 = fai2-B_Mercator*Math.PI/180;
+                        var fai4 = (fai2+B_Mercator*Math.PI/180)/2;
+                        sum += K_trapezium*(A_trapezium*Math.sin(fai3/2)*Math.cos(fai4)
+                        -B_trapezium*Math.sin(fai3*3/2)*Math.cos(fai4*3)
+                        +C_trapezium*Math.sin(5*fai3/2)*Math.cos(5*fai4)
+                        -D_trapezium*Math.sin(7*fai3/2)*Math.cos(7*fai4));
+                    }
+                    return sum;
+                }
+                
+                //计算面积并记录
+                function recordarea_54(index,area_54,x_54,y_54)
+                {
+                    if(index == area_54.length)
+                    {
+                        area_54[index-1] += calarea_54(x_54,y_54);
+                    }
+                    else
+                    {
+                        area_54.push(calarea_54(x_54,y_54));
+                    }
+                }
+
+                //转换坐标并计算面积
+                function mercatorTo54(lines,area,area_54,x,y,x_54,y_54)
+                {
+                    var newlines = new Array(lines.length);
+                    newlines[0] = lines[0];
+                    var index = Number(lines[0]);
+                    for(var i = 1;i<lines.length-2;i++)
+                    {
+                        if(lines[i].split(",")[1] == undefined)
+                        {
+                            newlines[i] = lines[i];
+                            newlines[i+1] = lines[i+1];
+                            recordarea(index,area,x,y);
+                            recordarea_54(index,area_54,x_54,y_54);
+                            index = Number(lines[i+1]);
+                            i += 1;
+                            x = new Array();
+                            y = new Array();
+                            x_54 = new Array();
+                            y_54 = new Array();
+                        }
+                        else
+                        {
+                            newlines[i] = String(reverseMercatorL(lines[i].split(",")[0])) + "," 
+                            + String(180/Math.PI*reverseMercatorB(lines[i].split(",")[1],30*Math.PI/180));
+                            x.push(Number(lines[i].split(",")[1]));
+                            y.push(Number(lines[i].split(",")[0]));
+                            x_54.push(Number(newlines[i].split(",")[1]));
+                            y_54.push(Number(newlines[i].split(",")[0]));
+                        }
+                    }
+                    newlines[lines.length-2]="END";
+                    newlines[lines.length-1]="END";
+                    recordarea(index,area,x,y);
+                    recordarea_54(index,area_54,x_54,y_54);
+                    return newlines;
+                }
+
+                //读取文件
+                var file = document.getElementById("file").files[0];
+                var reader = new FileReader();
+                reader.readAsText(file);
+                reader.onload=function(e){
+                    var lines = new Array();
+                    var str = "";
+                    str += reader.result;
+                    str = str.trim();
+                    lines = str.split("\n");
+                    var lines_54 = mercatorTo54(lines,area,area_54,x,y,x_54,y_54);
+
+                    //起点
+                    var Mercator_Y = Number(lines[1].split(",")[0]);
+                    var Mercator_X = Number(lines[1].split(",")[1]);
+                    var Y_54_start = Number(lines_54[1].split(",")[0]);
+                    var X_54_start = Number(lines_54[1].split(",")[1]);
+
+
+                    //不同投影的缩放参数
+                    var scale1 = ZoomToCenter(lines).a1;
+                    var XOffsize1 = ZoomToCenter(lines).b1;
+                    var YOffsize1 = ZoomToCenter(lines).c1
+                    var scale2 = ZoomToCenter(lines_54).a1;
+                    var XOffsize2 = ZoomToCenter(lines_54).b1;
+                    var YOffsize2 = ZoomToCenter(lines_54).c1
+
+                    //从第一个特征点处落笔
+                    context.moveTo(scale1 * (Mercator_Y - YOffsize1),scale1*(XOffsize1 - Mercator_X));
+                    context1.moveTo(scale2 * (Y_54_start - YOffsize2),scale2*(XOffsize2 - X_54_start));
+                    for(var i = 2; i < lines.length - 1; i++)
+                    {
+                        var b = lines[i].split(",")[0];
+                        var a = lines[i].split(",")[1];
+                        if(a==undefined && i != lines.length - 2)//遇到END时
+                        {
+                            var Mercator_Y_next = Number(lines[i+2].split(",")[0]);
+                            var Mercator_X_next = Number(lines[i+2].split(",")[1]);
+                            var a_next_54 = Number(lines_54[i+2].split(",")[1]);
+                            var b_next_54 = Number(lines_54[i+2].split(",")[0]);
+                            context.moveTo(scale1*(Mercator_Y_next-YOffsize1),scale1*(XOffsize1-Mercator_X_next));
+                            context1.moveTo(scale2*(b_next_54-YOffsize2),scale2*(XOffsize2-a_next_54));
+                        }
+                        else
+                        {
+                            a = Number(a);
+                            b = Number(b);
+                            var X_54 = lines_54[i].split(",")[1];
+                            var Y_54 = lines_54[i].split(",")[0];
+                            context.lineTo(scale1*(b-YOffsize1),scale1*(XOffsize1-a));
+                            context1.lineTo(scale2*(Y_54-YOffsize2),scale2*(XOffsize2-X_54));
+                        }
+                    }
+
+                    //画出面积表格
+                    var table1 = document.getElementById("table1");
+                    var table2 = document.getElementById("table2");
+                    table1.setAttribute("border","1");
+                    table2.setAttribute("border","1");
+                    var trNode1 = table1.insertRow();
+                    var tdNode1 = trNode1.insertCell();
+                    var tdNode2 = trNode1.insertCell();
+                    var trNode2 = table2.insertRow();
+                    var tdNode3 = trNode2.insertCell();
+                    var tdNode4 = trNode2.insertCell();
+                    tdNode1.innerHTML = "ID";
+                    tdNode2.innerHTML = "面积";
+                    tdNode3.innerHTML = "ID";
+                    tdNode4.innerHTML = "面积";
+                    for(var i = 0;i<area.length;i++)
+                    {
+                        trNode1 = table1.insertRow();
+                        tdNode1 = trNode1.insertCell();
+                        tdNode2 = trNode1.insertCell();
+                        tdNode1.innerHTML = i;
+                        tdNode2.innerHTML = area[i];
+                        trNode2 = table2.insertRow();
+                        tdNode3 = trNode2.insertCell();
+                        tdNode4 = trNode2.insertCell();
+                        tdNode3.innerHTML = i;
+                        tdNode4.innerHTML = area_54[i];
+                    }
+
+                    context.stroke();
+                    context1.stroke();
+                }
+            }
+        </script>
+    </body>
+</html>

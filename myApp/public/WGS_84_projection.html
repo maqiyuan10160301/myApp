@@ -109,9 +109,9 @@
                 {
                     var newlines = new Array(lines.length);
                     newlines[0] = lines[0];
-                    for(var i = 1;i<lines.length-1;i++)
+                    for(var i = 1;i<lines.length-2;i++)
                     {
-                        if(lines[i].split(",")[1] == undefined && i != lines.length - 2)
+                        if(lines[i].split(",")[1] == undefined)
                         {
                             newlines[i] = lines[i];
                             newlines[i+1] = lines[i+1];
@@ -122,6 +122,8 @@
                             newlines[i] = String(MercatorY(lines[i].split(",")[0])) + "," + String(MercatorX(lines[i].split(",")[1]));
                         }
                     }
+                    newlines[lines.length-2]="END";
+                    newlines[lines.length-1]="END";
                     return newlines;
                 }
 
