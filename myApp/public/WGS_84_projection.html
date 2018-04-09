@@ -147,7 +147,7 @@
                     var str = "";
                     str += reader.result;
                     str = str.trim();
-                    lines = reader.result.split("\n");
+                    lines = str.split("\n");
                     
                     //经过投影变换的字符数组
                     var lines_Mercator = linestoMercator(lines);

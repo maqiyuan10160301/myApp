@@ -1,6 +1,6 @@
 <html>
     <header>
-        <title>兰勃特投影与墨卡托投影</title>
+        <title>多边形面积计算</title>
     </header>
     <body>
         <input type="file" id="file" onchange="readGen(this.file)"><br>
@@ -169,7 +169,7 @@
                     var newlines = new Array(lines.length);
                     newlines[0] = lines[0];
                     var index = Number(lines[0]);
-                    for(var i = 1;i<lines.length-2;i++)
+                    for(var i = 1;i<lines.length-1;i++)
                     {
                         if(lines[i].split(",")[1] == undefined)
                         {
@@ -194,10 +194,6 @@
                             y_54.push(Number(newlines[i].split(",")[0]));
                         }
                     }
-                    newlines[lines.length-2]="END";
-                    newlines[lines.length-1]="END";
-                    recordarea(index,area,x,y);
-                    recordarea_54(index,area_54,x_54,y_54);
                     return newlines;
                 }
 
