@@ -146,7 +146,7 @@
                     if(js[p].time+arr.time[js[p].last+cn]<=arr.deadline[js[p].last+cn])
                     {
                         js[num+1].pb = 0
-                        for(var i = 1;i<=n;i++)
+                        for(var i = 1;i<=n;i++)//计算剩余价值
                         {
                             if(js[num+1].finished[i]==0)
                                 js[num+1].pb += arr.profit[i];
@@ -159,7 +159,7 @@
                         {
                             num++;
                             //更新已完成工作总时间
-                            js[num].time = js[p].time + arr.time[js[p].lat+cn];
+                            js[num].time = js[p].time + arr.time[js[p].last+cn];
                             if(minimum.pb>js[num].pb)
                                 minimum = js[num];
                             queue.push(js[num]);
@@ -172,6 +172,7 @@
                         return 0;
                 }
             }
+
             var bottom = 0;
             var queue = new Array();
             var n = 0;
