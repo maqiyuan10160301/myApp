@@ -1,0 +1,105 @@
+<html>
+<head>
+    <title>四叉树</title>
+</head>
+<body>
+    <input type="file" id="file" onchange="quadtree(this.file)"><br>
+    <div id="content"></div>
+    <table id="raster" border="0"></table>
+    <div id="code"></div>
+    <script>
+        var indexnum=[];
+        var depthnum=[];
+        var numrecord=[];
+        function quadcode(matrix,rowmax,linemax,rowlinenum,depth)
+        {
+            var bool=true;
+            for(var i=0;i<rowlinenum;i++)
+            {
+                for(var j=0;j<rowlinenum;j++)
+                {
+                    if(matrix[rowmax][linemax]!=matrix[rowmax-i][linemax-j])
+                        bool=false;
+                }
+            }
+            if(bool==false && rowlinenum%2==0)
+            {
+                quadcode(matrix,rowmax-rowlinenum/2,linemax-rowlinenum/2,rowlinenum/2,depth+1);
+                quadcode(matrix,rowmax-rowlinenum/2,linemax,rowlinenum/2,depth+1);
+                quadcode(matrix,rowmax,linemax-rowlinenum/2,rowlinenum/2,depth+1);
+                quadcode(matrix,rowmax,linemax,rowlinenum/2,depth+1);
+            }
+            else
+            {
+                var Mortan=parseInt((rowmax-rowlinenum+1).toString(2))*2+parseInt((linemax-rowlinenum+1).toString(2));
+                indexnum.push(Mortan);
+                depthnum.push(depth);
+                numrecord.push(matrix[rowmax][linemax]);
+            }
+        }
+
+        function quadtree(file)
+        {
+            var file = document.getElementById("file").files[0];
+            var reader = new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e){
+                var str=reader.result;
+                str=str.trim();
+                var lines=str.split("\n");
+                var matrix=[];
+                var rownum=parseInt(lines[0].split(",")[0]);
+                var linenum=parseInt(lines[0].split(",")[1]);
+                var rowlinenum=Math.max(rownum,linenum);
+                if(Math.log2(rowlinenum)!=rowlinenum)
+                {
+                    rowlinenum=Math.pow(2,Math.ceil(Math.log2(rowlinenum)));
+                }
+                var mytable=document.getElementById("raster");
+                for(var i=1;i<lines.length;i++)
+                {
+                    var tempmatrix=[];
+                    tempmatrix=lines[i].split(",");
+                    tempmatrix.splice(linenum);
+                    for(var j=0;j<linenum;j++)
+                    {
+                        tempmatrix[j]=parseInt(tempmatrix[j]);
+                    }
+                    for(var j=linenum;j<rowlinenum;j++)
+                        tempmatrix.push(0);
+                    matrix.push(tempmatrix);
+                }
+                for(var i=rownum;i<rowlinenum;i++)
+                {
+                    var tempmatrix=[];
+                    for(var j=0;j<rowlinenum;j++)
+                    {
+                        tempmatrix.push(0);
+                    }
+                    matrix.push(tempmatrix);
+                }
+                
+                document.getElementById("content").innerHTML="行数："+String(rownum)+"<br>";
+                document.getElementById("content").innerHTML+="列数："+String(linenum)+"<br>";
+                document.getElementById("content").innerHTML+="<br>栅格矩阵<br>";
+                for(var i=0;i<rowlinenum;i++)
+                {
+                    var trNode=mytable.insertRow();
+                    for(var j=0;j<rowlinenum;j++)
+                    {
+                        var tdNode=trNode.insertCell();
+                        tdNode.innerHTML=matrix[i][j];
+                    }
+                }
+                quadcode(matrix,rowlinenum-1,rowlinenum-1,rowlinenum,0);
+
+                document.getElementById("code").innerHTML="<br>线性编码四叉树<br>";
+                for(var i=0;i<indexnum.length;i++)
+                {
+                    document.getElementById("code").innerHTML+="("+indexnum[i]+","+depthnum[i]+","+numrecord[i]+")<br>";
+                }
+            }
+        }
+    </script>
+</body>
+</html>
