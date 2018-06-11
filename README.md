@@ -26,3 +26,11 @@
 ## 空间度量算法
 
 - [多边形面积计算](https://maqiyuan10160301.github.io/myApp/myApp/public/areaofpolygon.html)
+
+## 矢量数据压缩
+
+- [道格拉斯-普克算法](https://maqiyuan10160301.github.io/myApp/myApp/public/DouglasPeucker.html)
+
+## 空间数据索引
+
+- [四叉树](https://maqiyuan10160301.github.io/myApp/myApp/public/quadtree.html)
