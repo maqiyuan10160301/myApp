@@ -5,18 +5,18 @@
     </head>
     <body>
         <table border="1" align="center">
-            <tr><td colspan="5">马按中国象棋跳法，从初始位置起跳，跳至边界后返回，求所有到达边界后返回初始位置、过程中跳跃点不重复的周游路线。</td></tr>
+            <tr><td colspan="5">马按中国象棋跳法，从初始位置起跳，跳至边界后返回，求所有到达边界后返回初始位置、过程中跳跃点不重复的周游路线。<br>图中红线是棋盘，蓝线是跳马路线，绿点是起点，紫点是第一步跳到的位置。</td></tr>
             <tr align="center">
-                <th>棋盘行数</th>
+                <th>棋盘列数</th>
                 <td><input type="textarea" id="row" value="4"/></td>
-                <th>起始行号</th>
+                <th>起始列号</th>
                 <td><input type="textarea" id="rownum" value="0"/></td>
                 <td rowspan="2"><input type="button" id="print" value="计算路线" onclick="main()"></td>
             </tr>
             <tr align="center">
-                <th>棋盘列数</th>
+                <th>棋盘行数</th>
                 <td><input type="textarea" id="colume" value="4"/></td>
-                <th>起始列号</th>
+                <th>起始行号</th>
                 <td><input type="textarea" id="columenum" value="0"/></td>
             </tr>
             <tr><td colspan="5" id="content"></td></tr>
@@ -82,6 +82,7 @@
                                     plan += "方案";
                                     plan += count;
                                     plan += ":";
+                                    tempEveryStep = [];
                                     for(var j=0;j<step;j++)
                                     {
                                         plan += "(";
@@ -90,6 +91,8 @@
                                         plan += path_y[j];
                                         plan += ")";
                                         plan += " -> ";
+                                        
+                                        tempEveryStep.push([path_x[j],path_y[j]]);
                                     }
                                     plan += "(";
                                     plan += path_x[0];
@@ -97,6 +100,9 @@
                                     plan += path_y[0];
                                     plan += ")";
                                     plan += "<br>";
+                                    plan += "<canvas id = \""+ count +"\" height = \"180px\"></canvas><br>"
+                                    tempEveryStep.push([path_x[0],path_y[0]]);
+                                    everyStep.push(tempEveryStep);
                                     
                                 }
                                 reachborder = 0;
@@ -113,6 +119,7 @@
                 reachborder = 0;
                 text = "";
                 plan = "";
+                everyStep = [];
                 count = 0;
                 //获取用户输入信息
                 var a = Number(document.getElementById("row").value);
@@ -134,10 +141,40 @@
                     text += "总方案数:";
                     text += count;
                     text += "<br>";
-                    text+=plan;
+                    text += plan;
+                    
                     //var nodecontent = document.createTextNode(text);
                     //document.getElementById("content").appendChild(nodecontent);
                     document.getElementById("content").innerHTML=text;
+                    for(var i = 0; i < everyStep.length; i++)
+                    {
+                        var mycanvas = document.getElementById(String(i+1));
+                        var context = mycanvas.getContext("2d");
+                        for(var j = 0; j < b - 1; j++)
+                        {
+                            for(var k = 0; k < a - 1; k++)
+                            {
+                                context.strokeStyle = "red";
+                                context.strokeRect(k*30+10,j*30+10,30,30);
+                            }
+                        }
+                        context.beginPath();
+                        context.fillStyle = "green";
+                        context.arc(c*30+10,(a - 1)*30-(d*30-10),5,0,2*Math.PI);
+                        context.fill();
+                        context.beginPath();
+                        context.fillStyle = "purple";
+                        context.arc(everyStep[i][1][0]*30+10,(a - 1)*30-(everyStep[i][1][1]*30-10),5,0,2*Math.PI);
+                        context.fill();
+                        context.beginPath();
+                        context.strokeStyle = "blue";
+                        context.moveTo(everyStep[i][0][0]*30+10,(a - 1)*30-(everyStep[i][0][1]*30-10));
+                        for(var j = 0; j < everyStep[i].length; j++)
+                        {
+                            context.lineTo(everyStep[i][j][0]*30+10,(a - 1)*30-(everyStep[i][j][1]*30-10));
+                        }
+                        context.stroke();
+                    }
                 }
                 //如果用户输入信息无效，让用户重新输入
                 else{
