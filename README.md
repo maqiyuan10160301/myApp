@@ -34,3 +34,15 @@
 ## 空间数据索引
 
 - [四叉树](https://maqiyuan10160301.github.io/myApp/myApp/public/quadtree.html)
+
+## 空间数据组织算法
+
+- [左转算法](https://maqiyuan10160301.github.io/myApp/myApp/public/turnleft.html)
+
+## 数据输出算法
+
+- [面状符号](https://maqiyuan10160301.github.io/myApp/myApp/public/symbol.html)
+
+## 数据转换算法
+
+- [矢量面的栅格化](https://maqiyuan10160301.github.io/myApp/myApp/public/toraster.html)
