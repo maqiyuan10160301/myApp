@@ -47,7 +47,7 @@
                 mycanvas.setAttribute("width","1000px");
                 mycanvas1.setAttribute("width","1000px");
                 mycanvas2.setAttribute("width","1000px");
-                mycanvas2.setAttribute("height","260px");
+                mycanvas2.setAttribute("height","160px");
                 mycanvas3.setAttribute("width","1000px");
                 mycanvas4.setAttribute("width","1000px");
                 mycanvas4.setAttribute("height","400px");
@@ -75,49 +75,112 @@
                     var str = "";
                     str += reader.result;
                     str = str.trim();
-                    lines = reader.result.split("\n");
+                    lines = reader.result.split("\r\n");
+                    var name = [];
+                    var character = [];
+                    var singleLine = [];
+                    var nowCha = 1;
+                    for(i = 1; i < lines.length-1; i++)
+                    {
+                        if(lines[i]=="END")
+                        {
+                            character.push(singleLine);
+                            if(lines[i+1]!=nowCha)
+                            {
+                                name.push(character);
+                                nowCha = Number(lines[i+1]);
+                                character = [];
+                            }
+                            i += 1;
+                            singleLine = [];
+                            continue;
+                        }
+                        singleLine.push([Number(lines[i].split(",")[0]),Number(lines[i].split(",")[1])]);
+                    }
                     
-                    var start_x = Number(lines[1].split(",")[0]);
-                    var start_y = Number(lines[1].split(",")[1]);
+                    function charMin(character)
+                    {
+                        var min = 9999;
+                        for(var i = 0; i < character.length; i++)
+                        {
+                            for(var j = 0; j < character[i].length; j++)
+                            {
+                                if(character[i][j][0]<min)
+                                    min = character[i][j][0];
+                            }
+                            
+                        }
+                        return min;
+                    }
+
+                    for(var i = 0; i < name.length; i++)
+                    {
+                        var Xmin = charMin(name[i]);
+                        for(var j = 0; j < name[i].length; j++)
+                        {
+                            context.moveTo(10 * name[i][j][0][0],160 - 10 * name[i][j][0][1]);
+                            context1.moveTo(10 + 10 * (name[i][j][0][0] - b1 * name[i][j][0][1]),160 - 10 * name[i][j][0][1]);
+                            context2.moveTo(10 * name[i][j][0][0],160 - 10 * (name[i][j][0][1] + b1 * (name[i][j][0][0]-Xmin)));
+                            context3.moveTo(5 * name[i][j][0][0],160 - 10 * name[i][j][0][1])
+                            context4.moveTo(10 * (name[i][j][0][0] * Math.sqrt(1/2) + name[i][j][0][1] * Math.sqrt(1/2)),70 - 10 * (name[i][j][0][1] * Math.sqrt(1/2) - name[i][j][0][0] * Math.sqrt(1/2)));
+                            context5.moveTo(160 - 10 * name[i][j][0][1],10 * name[i][j][0][0]);
+                            context6.moveTo(10 * name[i][j][0][0] + 100,260 - 10 * name[i][j][0][1]);
+                            for(k = 0; k < name[i][j].length; k++)
+                            {
+                                context.lineTo(10 * name[i][j][k][0],160 - 10 * name[i][j][k][1]);
+                                context1.lineTo(10 + 10 * (name[i][j][k][0] - b1 * name[i][j][k][1]),160 - 10 * name[i][j][k][1]);
+                                context2.lineTo(10 * name[i][j][k][0],160 - 10 * (name[i][j][k][1] + b1 * (name[i][j][k][0]-Xmin)));
+                                context3.lineTo(5 * name[i][j][k][0],160 - 10 * name[i][j][k][1])
+                                context4.lineTo(10 * (name[i][j][k][0] * Math.sqrt(1/2) + name[i][j][k][1] * Math.sqrt(1/2)),70 - 10 * (name[i][j][k][1] * Math.sqrt(1/2) - name[i][j][k][0] * Math.sqrt(1/2)));
+                                context5.lineTo(160 - 10 * name[i][j][k][1],10 * name[i][j][k][0]);
+                                context6.lineTo(10 * name[i][j][k][0] + 100,260 - 10 * name[i][j][k][1]);
+                            }
+                        }
+                        
+                    }
+
+
+                    // var start_x = Number(lines[1].split(",")[0]);
+                    // var start_y = Number(lines[1].split(",")[1]);
 
                     //从第一个特征点处落笔
-                    context.moveTo(10 * start_x,160 - 10 * start_y);
-                    context1.moveTo(10 + 10 * (start_x - b1 * start_y),160 - 10 * start_y);
-                    context2.moveTo(10 * start_x,260 - 10 * (start_y + b1 * start_x));
-                    context3.moveTo(5 * start_x,160 - 10 * start_y)
-                    context4.moveTo(10 * (start_x * Math.sqrt(1/2) + start_y * Math.sqrt(1/2)),70 - 10 * (start_y * Math.sqrt(1/2) - start_x * Math.sqrt(1/2)));
-                    context5.moveTo(160 - 10 * start_y,10 * start_x);
-                    context6.moveTo(10 * start_x + 100,260 - 10 * start_y);
-                    for(var i = 2; i < lines.length - 1; i++)
-                    {
-                        var a = lines[i].split(",")[0];
-                        var b = lines[i].split(",")[1];
-                        if(b==undefined && i != lines.length - 2)//遇到END时
-                        {
-                            x_next = Number(lines[i+2].split(",")[0]);
-                            y_next = Number(lines[i+2].split(",")[1]);
-                            context.moveTo(10 * x_next,160 - 10 * y_next);
-                            context1.moveTo(10 + 10 * (x_next - b1 * y_next),160 - 10 * y_next);
-                            context2.moveTo(10 * x_next,260 - 10 * (y_next + b1 * x_next));
-                            context3.moveTo(5 * x_next,160 - 10 * y_next);
-                            context4.moveTo(10 * (x_next * Math.sqrt(1/2) + y_next * Math.sqrt(1/2)),70 - 10 * (y_next * Math.sqrt(1/2) - x_next * Math.sqrt(1/2)));
-                            context5.moveTo(160 - 10 * y_next,10 * x_next);
-                            context6.moveTo(10 * x_next + 100,260 - 10 * y_next);
-                            i += 1;
-                        }
-                        else
-                        {
-                            a = Number(a);
-                            b = Number(b);
-                            context.lineTo(10 * a,160 - 10 * b);
-                            context1.lineTo((10 + 10 * (a - b1 * b)),(160 - 10 * b));
-                            context2.lineTo(10 * a,(260 - 10*(b + b1 * a)));
-                            context3.lineTo(5 * a,160 - 10 * b);
-                            context4.lineTo(10 * (a * Math.sqrt(1/2) + b * Math.sqrt(1/2)),70 - 10 * (b * Math.sqrt(1/2) - a * Math.sqrt(1/2)));
-                            context5.lineTo(160 - 10 * b,10 * a);
-                            context6.lineTo(10 * a + 100,260 - 10 * b);
-                        }
-                    }
+                    // context.moveTo(10 * start_x,160 - 10 * start_y);
+                    // context1.moveTo(10 + 10 * (start_x - b1 * start_y),160 - 10 * start_y);
+                    // context2.moveTo(10 * start_x,260 - 10 * (start_y + b1 * start_x));
+                    // context3.moveTo(5 * start_x,160 - 10 * start_y)
+                    // context4.moveTo(10 * (start_x * Math.sqrt(1/2) + start_y * Math.sqrt(1/2)),70 - 10 * (start_y * Math.sqrt(1/2) - start_x * Math.sqrt(1/2)));
+                    // context5.moveTo(160 - 10 * start_y,10 * start_x);
+                    // context6.moveTo(10 * start_x + 100,260 - 10 * start_y);
+                    // for(var i = 2; i < lines.length - 1; i++)
+                    // {
+                    //     var a = lines[i].split(",")[0];
+                    //     var b = lines[i].split(",")[1];
+                    //     if(b==undefined && i != lines.length - 2)//遇到END时
+                    //     {
+                    //         x_next = Number(lines[i+2].split(",")[0]);
+                    //         y_next = Number(lines[i+2].split(",")[1]);
+                    //         context.moveTo(10 * x_next,160 - 10 * y_next);
+                    //         context1.moveTo(10 + 10 * (x_next - b1 * y_next),160 - 10 * y_next);
+                    //         context2.moveTo(10 * x_next,260 - 10 * (y_next + b1 * x_next));
+                    //         context3.moveTo(5 * x_next,160 - 10 * y_next);
+                    //         context4.moveTo(10 * (x_next * Math.sqrt(1/2) + y_next * Math.sqrt(1/2)),70 - 10 * (y_next * Math.sqrt(1/2) - x_next * Math.sqrt(1/2)));
+                    //         context5.moveTo(160 - 10 * y_next,10 * x_next);
+                    //         context6.moveTo(10 * x_next + 100,260 - 10 * y_next);
+                    //         i += 1;
+                    //     }
+                    //     else
+                    //     {
+                    //         a = Number(a);
+                    //         b = Number(b);
+                    //         context.lineTo(10 * a,160 - 10 * b);
+                    //         context1.lineTo((10 + 10 * (a - b1 * b)),(160 - 10 * b));
+                    //         context2.lineTo(10 * a,(260 - 10*(b + b1 * a)));
+                    //         context3.lineTo(5 * a,160 - 10 * b);
+                    //         context4.lineTo(10 * (a * Math.sqrt(1/2) + b * Math.sqrt(1/2)),70 - 10 * (b * Math.sqrt(1/2) - a * Math.sqrt(1/2)));
+                    //         context5.lineTo(160 - 10 * b,10 * a);
+                    //         context6.lineTo(10 * a + 100,260 - 10 * b);
+                    //     }
+                    // }
                     context.stroke();
                     context1.stroke();
                     context2.stroke();

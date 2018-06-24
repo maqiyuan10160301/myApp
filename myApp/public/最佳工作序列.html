@@ -3,12 +3,128 @@
         <title>最佳工作序列</title>
     </head>
     <body>
+        <input type="button" id="input" value="手动输入" onclick="createTable()">
+        <input type="file" id="file" onchange="readcsv(this.file)"><br>
         <table border="1" align="center" id="table">
-            <tr align="center" id="table"><td colspan="6">请输入任务数</td>
-            <td><input type="number" id="missionnum" value="4"/></td>
-            <td><input type="button" id="confirm" value="确定" onclick="receivenum()"></td></tr>
         </table>
         <script>
+            function readcsv(file)
+            {
+                var file = document.getElementById("file").files[0];
+                var reader = new FileReader();
+                reader.readAsText(file);
+                reader.onload=function(e)
+                {
+                    var lines = new Array();
+                    var str = "";
+                    str += reader.result;
+                    str = str.trim();
+                    lines = str.split("\r\n");
+                    var colmis;
+                    var coltime;
+                    var coldead;
+                    var colpro;
+                    for(var i = 0; i < lines[0].split(",").length; i++)
+                    {
+                        if(lines[0].split(",")[i] == "任务")
+                            colmis = i;
+                        else if(lines[0].split(",")[i] == "费时")
+                            coltime = i;
+                        else if(lines[0].split(",")[i] == "最后完成期限")
+                            coldead = i;
+                        else if(lines[0].split(",")[i] == "价值")
+                            colpro = i;
+                    }
+                    var mytable = document.getElementById("table");
+                    for(var i = 1;i<=lines.length-1;i++)
+                    {
+                        var trNode = mytable.insertRow();
+                        for (var j = 1;j<=8;j++)
+                        {
+                            var tdNode = trNode.insertCell();
+                            var nodeId = "r"+String(i)+"d"+String(j);
+                            if(j==1)
+                            {
+                                tdNode.innerHTML="序号";
+                                tdNode.setAttribute("align","center");
+                            }
+                            else if(j==2)
+                            {
+                                var myinput = document.createElement("input");
+                                myinput.setAttribute("type","textarea");
+                                myinput.setAttribute("id","r"+String(i)+"d"+String(j));
+                                myinput.setAttribute("value",String(lines[i].split(",")[colmis]));
+                                tdNode.appendChild(myinput);
+                            }
+                            else if(j==3)
+                            {
+                                tdNode.innerHTML="用时";
+                                tdNode.setAttribute("align","center");
+                            }
+                            else if(j==4)
+                            {
+                                var myinput = document.createElement("input");
+                                myinput.setAttribute("type","textarea");
+                                myinput.setAttribute("id","r"+String(i)+"d"+String(j));
+                                myinput.setAttribute("value",String(lines[i].split(",")[coltime]));
+                                tdNode.appendChild(myinput);
+                            }
+                            else if(j==5)
+                            {
+                                tdNode.innerHTML="期限";
+                                tdNode.setAttribute("align","center");
+                            }
+                            else if(j==6)
+                            {
+                                var myinput = document.createElement("input");
+                                myinput.setAttribute("type","textarea");
+                                myinput.setAttribute("id","r"+String(i)+"d"+String(j));
+                                myinput.setAttribute("value",String(lines[i].split(",")[coldead]));
+                                tdNode.appendChild(myinput);
+                            }
+                            else if(j==7)
+                            {
+                                tdNode.innerHTML="效益";
+                                tdNode.setAttribute("align","center");
+                            }
+                            else if(j==8)
+                            {
+                                var myinput = document.createElement("input");
+                                myinput.setAttribute("type","textarea");
+                                myinput.setAttribute("id","r"+String(i)+"d"+String(j));
+                                myinput.setAttribute("value",String(lines[i].split(",")[colpro]));
+                                tdNode.appendChild(myinput);
+                            }
+                        }
+                    }
+                    
+                    var trNode = mytable.insertRow();
+                    var tdNode = trNode.insertCell();
+                    tdNode.setAttribute("colspan","8");
+                    tdNode.setAttribute("align","center");
+                    var myinput = document.createElement("input");
+                    myinput.setAttribute("type","button");
+                    myinput.setAttribute("id","submit");
+                    myinput.setAttribute("value","提交");
+                    myinput.onclick=main;
+                    tdNode.appendChild(myinput);
+                    n = lines.length-1;
+                }
+            }
+            function createTable()
+            {
+                var mytable = document.getElementById("table");
+                var trNode = mytable.insertRow();
+                trNode.setAttribute("align","center");
+                var tdNode = trNode.insertCell();
+                tdNode.setAttribute("colspan","6");
+                tdNode.innerHTML = "请输入任务数";
+                var tdNode = trNode.insertCell();
+                tdNode.innerHTML = "<input type=\"number\" id=\"missionnum\" value=\"4\"/>";
+                var tdNode = trNode.insertCell();
+                tdNode.innerHTML = "<input type=\"button\" id=\"confirm\" value=\"确定\" onclick=\"receivenum()\">";
+            }
+
             //获取任务数量，并由用户输入具体信息
             function receivenum()
             {
@@ -102,7 +218,7 @@
                 n = document.getElementById("missionnum").value;
             }
             
-            function initJs(js,profit,n,pmin,minimum)
+            function initJs(profit,n)
             {
                 js[0].jobnum = 0;
                 js[0].pb = 0;
@@ -111,9 +227,10 @@
                 js[0].parent = 0;
                 js[0].depth = 0;
                 js[0].index = 0;
+                js[0].finished = Array(n+1).fill(0);
+                js[0].finished[0]=undefined;
                 for(var i = 1;i<=n;i++)
                 {
-                    js[0].finished[i] = 0;
                     js[0].pb += profit[i];
                 }
                 pmin = js[0];
@@ -134,7 +251,7 @@
             }
 
             //寻找以p为父亲结点所有的子结点
-            function search(js,arr,n,p)
+            function search(n,p)
             {
                 if(js[p].last<n)//如果到达最后的工作则无子节点
                 {
@@ -167,44 +284,26 @@
                     }
                     cn++;
                     if(cn<n-js[p].last+1)//如果未找到最右边的孩子
-                        search(js,arr,n,p);//寻找右兄弟
+                        search(n,p);//寻找右兄弟
                     else
                         return 0;
                 }
             }
 
-            var bottom = 0;
             var queue = new Array();
-            var n = 0;
             var num = 0;
             var cn = 0;
             var rc = new Array();
-            var k = 0;
-            var Jobs;
             var minimum;
             var pmin;
-            var Job;
+            var js;
+            var arr;
             function main()
             {
-                bottom = 0;         //定义队首位置
-                queue = new Array();//定义队列
-                n = 0;
+                var bottom = 0;         //定义队首位置
                 num = 0;                        //树实际结点数
                 cn = 0;                         //一个结点的孩子数
                 rc = new Array();               //所有结点
-                k = 0;
-                Jobs = {
-                    finished : new Array(n),//记录已完成的工作序列
-                    pb : undefined,         //剩余价值的和
-                    time : undefined,       //最后一项工作完成时间
-                    last : undefined,       //完成最后一项工作的序号
-                    parent : undefined,     //记录父结点
-                    jobnum : undefined,     //总工作数
-                    depth : undefined,      //深度
-                    index : undefined       //下标
-                }
-                minimum = Object.create(Jobs);  //当前剩余价值最小值
-                pmin = Object.create(Jobs);     //一层中剩余价值最小值
                 Job = {
                     id : new Array(),
                     time : new Array(),
@@ -212,19 +311,57 @@
                     profit : new Array()
                 }
                 var text="";
-                var arr = Object.create(Job);
+                arr = Object.create(Job);
                 arr.id = [0];
                 arr.time = [0];
                 arr.deadline = [0];
                 arr.profit = [0];
-                for(var i=1;i<=Number(document.getElementById("missionnum").value);i++)
+                if(document.getElementById("missionnum")==null)
                 {
-                    arr.id.push(document.getElementById("r"+String(i)+"d2").value);
-                    arr.time.push(Number(document.getElementById("r"+String(i)+"d4").value));
-                    arr.deadline.push(Number(document.getElementById("r"+String(i)+"d6").value));
-                    arr.profit.push(Number(document.getElementById("r"+String(i)+"d8").value));
+                    var a =  document.getElementById("table").innerHTML;
+                    
+                    for(var i=1;i<=a.split("<tr>").length-2;i++)
+                    {
+                        arr.id.push(document.getElementById("r"+String(i)+"d2").value);
+                        arr.time.push(Number(document.getElementById("r"+String(i)+"d4").value));
+                        arr.deadline.push(Number(document.getElementById("r"+String(i)+"d6").value));
+                        arr.profit.push(Number(document.getElementById("r"+String(i)+"d8").value));
+                    }
+                }
+                else
+                {
+                    for(var i=1;i<=Number(document.getElementById("missionnum").value);i++)
+                    {
+                        arr.id.push(document.getElementById("r"+String(i)+"d2").value);
+                        arr.time.push(Number(document.getElementById("r"+String(i)+"d4").value));
+                        arr.deadline.push(Number(document.getElementById("r"+String(i)+"d6").value));
+                        arr.profit.push(Number(document.getElementById("r"+String(i)+"d8").value));
+                    }
                 }
                 var n = arr.id.length-1;
+                // Jobs = {
+                //     finished : new Array(),//记录已完成的工作序列
+                //     pb : undefined,         //剩余价值的和
+                //     time : undefined,       //最后一项工作完成时间
+                //     last : undefined,       //完成最后一项工作的序号
+                //     parent : undefined,     //记录父结点
+                //     jobnum : undefined,     //总工作数
+                //     depth : undefined,      //深度
+                //     index : undefined       //下标
+                // }
+                function Jobs(n)
+                {
+                    this.finished = new Array(n+1);//记录已完成的工作序列
+                    this.pb=undefined;         //剩余价值的和
+                    this.time=undefined;       //最后一项工作完成时间
+                    this.last=undefined;       //完成最后一项工作的序号
+                    this.parent=undefined;     //记录父结点
+                    this.jobnum=undefined;     //总工作数
+                    this.depth=undefined;      //深度
+                    this.index=undefined;       //下标
+                }
+                minimum = new Jobs(n);  //当前剩余价值最小值
+                pmin = new Jobs(n);     //一层中剩余价值最小值
                 var p = -1;             //父结点
                 //按完成期限由小到大排序
                 for(var i = 1;i < n+1;i++)
@@ -245,16 +382,18 @@
                             arr.time[j] = temp;
                         }
                 
-                var js = new Array();
-                for(var i = 0;i<n;i++)
-                    js.push(Object.create(Jobs));
-                initJs(js,arr.profit,n,pmin,minimum);
-                var u = Object.create(Jobs);
-                var v = Object.create(Jobs);
-                var flag = Object.create(Jobs);
+                js = new Array();
+                for(var i = 0;i<100;i++)
+                    // js.push(Object.create(Jobs));
+                    js.push(new Jobs(n));
+                initJs(arr.profit,n);
+                var u = new Jobs(n);
+                var v = new Jobs(n);
+                var flag = new Jobs(n);
                 queue.push(js[0]);
                 queue.push(flag);
-                while(bottom != queue.length)//队列非空
+                p=-1;
+                while(bottom != queue.length+1)//队列非空
                 {
                     u = queue[bottom];
                     bottom += 1;
@@ -263,13 +402,14 @@
                     {
                         pmin = minimum;//处理完一层最后一个结点后更新一层中剩余价值最小值
                         queue.push(flag);
-                        if(v == flag)   break;//上一个出队也是flag时，队列为空
+                        if(v == flag)
+                            break;//上一个出队也是flag时，队列为空
                     }
                     else
                     {
                         p += 1;
                         cn = 1;//从第一个孩子开始查找
-                        search(js,arr,n,p);//查找u所有孩子，全部入队
+                        search(n,p);//查找u所有孩子，全部入队
                     }
                     v = u;//v为上一个出队元素
                 }

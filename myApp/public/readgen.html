@@ -20,7 +20,7 @@
                     var str = "";
                     str += reader.result;
                     str = str.trim();
-                    lines = reader.result.split("\n");
+                    lines = str.split("\n");
                     //从第一个特征点处落笔
                     context.moveTo(10*(lines[1].split(",")[0]),160 - 10*(lines[1].split(",")[1]));
                     for(var i = 2; i < lines.length - 1; i++)
