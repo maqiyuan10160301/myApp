@@ -37,6 +37,15 @@
                 numrecord.push(matrix[rowmax][linemax]);
             }
         }
+        function pad(num, n) 
+        {
+            var len = num.toString().length;
+            while(len < n) {
+                num = "0" + num;
+                len++;
+            }
+            return num;
+        }
 
         function quadtree(file)
         {
@@ -96,7 +105,7 @@
                 document.getElementById("code").innerHTML="<br>线性编码四叉树<br>";
                 for(var i=0;i<indexnum.length;i++)
                 {
-                    document.getElementById("code").innerHTML+="("+indexnum[i]+","+depthnum[i]+","+numrecord[i]+")<br>";
+                    document.getElementById("code").innerHTML+="("+pad(indexnum[i], Math.log2(rowlinenum))+","+depthnum[i]+","+numrecord[i]+")<br>";
                 }
             }
         }
