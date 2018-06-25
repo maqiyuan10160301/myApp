@@ -940,7 +940,7 @@
                 var startY = arcs[i].middleNodes[j].y;
                 var endX = arcs[i].middleNodes[j+1].x;
                 var endY = arcs[i].middleNodes[j+1].y;
-                var ymin = parseInt(Math.min(startY,endY));
+                var ymin = Math.ceil(Math.min(startY,endY));
                 var y = ymin;
                 if(startY < endY)
                 {
@@ -964,6 +964,48 @@
                             matrix[y-bottom][a] += rightP - leftP;
                         }
                         y += 1;
+                    }
+                }
+            }
+        }
+        for(var i = 0; i < polygons.length; i++)
+        {
+            if(polygons[i].area < 0)
+            {
+                for(var j = 0; j < polygons[i].ringArcs.length; j++)
+                {
+                    for(var k = 0; k < polygons[i].ringArcs[j].length; k++)
+                    {
+                        var startX = polygons[i].ringArcs[j].middleNodes[k].x;
+                        var startY = polygons[i].ringArcs[j].middleNodes[k].y;
+                        var endX = polygons[i].ringArcs[j].middleNodes[k+1].x;
+                        var endY = polygons[i].ringArcs[j].middleNodes[k+1].y;
+                        var ymin = Math.ceil(Math.min(startY,endY));
+                        var y = ymin;
+                        if(startY < endY)
+                        {
+                            while(y < Math.max(startY,endY))
+                            {
+                                var x = parseInt((y-startY)*(endX-startX)/(endY-startY)+startX);
+                                for(var a = 0; a < x - left; a++)
+                                {
+                                    matrix[y-bottom][a] += rightP - leftP;
+                                }
+                                y += 1;
+                            }
+                        }
+                        else if(startY > endY)
+                        {
+                            while(y < Math.max(startY,endY))
+                            {
+                                var x = parseInt((y-startY)*(endX-startX)/(endY-startY)+startX);
+                                for(a = 0; a < x - left; a++)
+                                {
+                                    matrix[y-bottom][a] += leftP - rightP;
+                                }
+                                y += 1;
+                            }
+                        }
                     }
                 }
             }
