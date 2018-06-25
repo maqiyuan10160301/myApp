@@ -921,6 +921,26 @@
             polygons = calArea(arcs,polygons);
             polygons = haveIsland(arcs,polygons);
             arcs = rightLeftPolygon(arcs,polygons);
+
+            color = ["#32CD32", "#FAEBD7", "#7FFFD4", "#8A2BE2", "#5F9EA0", "#FF7F50", "#DC143C", "#EEE8AA", "#FFD700", "#778899"]
+            for(var i = 0; i < polygons.length; i++)
+            {
+                if(polygons[i].area > 0)
+                {
+                    context.beginPath();
+                    var x = [];
+                    var y = [];
+                    polygonToPoints(arcs,polygons[i],x,y);
+                    context.fillStyle=color[i%10];
+                    context.moveTo(scale*(x[0]-YOffsize), scale*(XOffsize-y[0]));
+                    for(var j = 1; j < x.length; j++)
+                    {
+                        context.lineTo(scale*(x[j]-YOffsize), scale*(XOffsize-y[j]));
+                    }
+                    context.fill();
+                }
+            }
+            
             for(var i = 0; i < arcs.length; i++)
             {
                 context.beginPath();
